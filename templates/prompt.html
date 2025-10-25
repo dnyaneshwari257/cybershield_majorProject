@@ -1,0 +1,611 @@
+these are my templates
+base.html
+<!-- Create these files in a 'templates' folder -->
+
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EduLearn Platform{% endblock %}</title>
+    
+    <!-- External CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Floating particles background -->
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <!-- External JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+
+index.html
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="navbar">
+    <a href="/" class="navbar-brand">
+        <i class="fas fa-graduation-cap"></i> EduLearn
+    </a>
+</nav>
+
+<div class="container">
+    <div class="hero-section">
+        <h1 class="hero-title">
+            Welcome to EduLearn
+        </h1>
+        <p class="hero-subtitle">
+            Your gateway to knowledge and learning excellence. Join thousands of students in their educational journey with our modern learning management system.
+        </p>
+        
+        <div class="hero-buttons">
+            <a href="{{ url_for('register') }}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Get Started
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+register.html
+<!-- templates/register.html -->
+{% extends "base.html" %}
+
+{% block title %}Register - EduLearn{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <a href="{{ url_for('index') }}" class="navbar-brand">
+        <i class="fas fa-graduation-cap"></i> EduLearn
+    </a>
+</nav>
+
+<div class="container" style="margin-top: 50px;">
+    <div style="max-width: 500px; margin: 0 auto;">
+        <div class="card">
+            <div class="card-body">
+                <div class="page-header">
+                    <h2 class="page-title">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </h2>
+                    <p class="page-subtitle">Join our learning community today!</p>
+                </div>
+
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-user"></i> Full Name
+                        </label>
+                        <input type="text" name="full_name" class="form-input" required 
+                               placeholder="Enter your full name" autocomplete="name">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" name="email" class="form-input" required 
+                               placeholder="your.email@example.com" autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-phone"></i> Phone Number
+                        </label>
+                        <input type="tel" name="phone" class="form-input" required 
+                               placeholder="+1 (555) 123-4567" autocomplete="tel">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-book"></i> Course of Interest
+                        </label>
+                        <select name="course" class="form-input form-select" required>
+                            <option value="">Select your course</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="Web Development">Web Development</option>
+                            <option value="Digital Marketing">Digital Marketing</option>
+                            <option value="Graphic Design">Graphic Design</option>
+                            <option value="Business Administration">Business Administration</option>
+                            <option value="Cybersecurity">Cybersecurity</option>
+                            <option value="Mobile App Development">Mobile App Development</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-rocket"></i> Create My Account
+                    </button>
+                </form>
+
+                <div class="form-divider">
+                    <p>Already have an account?</p>
+                    <a href="{{ url_for('login') }}" class="btn btn-secondary">
+                        <i class="fas fa-sign-in-alt"></i> Login Here
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+login.html
+
+<!-- templates/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Login - EduLearn{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <a href="{{ url_for('index') }}" class="navbar-brand">
+        <i class="fas fa-graduation-cap"></i> EduLearn
+    </a>
+</nav>
+
+<div class="container" style="margin-top: 80px;">
+    <div style="max-width: 400px; margin: 0 auto;">
+        <div class="card">
+            <div class="card-body">
+                <div class="page-header">
+                    <h2 class="page-title">
+                        <i class="fas fa-sign-in-alt"></i> Welcome Back
+                    </h2>
+                    <p class="page-subtitle">Sign in to continue your learning journey</p>
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-id-card"></i> Moodle ID
+                        </label>
+                        <input type="text" name="moodle_id" class="form-input" required 
+                               placeholder="EDU25001" maxlength="8" autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="password-input-container">
+                            <input type="password" name="password" id="password" class="form-input" 
+                                   required placeholder="Enter your password" autocomplete="current-password">
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me for 30 days</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-arrow-right"></i> Sign In
+                    </button>
+                </form>
+
+                <div class="form-divider">
+                    <p>New to EduLearn?</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo credentials info -->
+        <div class="card demo-card">
+            <div class="card-body">
+                <div class="demo-content">
+                    <h4 class="demo-title">
+                        <i class="fas fa-info-circle"></i> Demo Information
+                    </h4>
+                    <p class="demo-text">
+                        Register first to get your unique Moodle ID and password via email! <br>
+                        Your Moodle ID will be in format: EDU25001, EDU25002, etc.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - EduLearn{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <a href="{{ url_for('dashboard') }}" class="navbar-brand">
+        <i class="fas fa-graduation-cap"></i> EduLearn
+    </a>
+    <div class="navbar-nav">
+        <span class="navbar-user">Welcome, {{ user_name }}!</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</nav>
+
+<div class="container" style="margin-top: 50px;">
+    <div class="page-header">
+        <h1 class="hero-title">
+            <i class="fas fa-tachometer-alt"></i> Your Learning Dashboard
+        </h1>
+        <p class="hero-subtitle">
+            Track your progress and continue your educational journey
+        </p>
+    </div>
+    
+    <!-- Statistics Grid -->
+    <div class="dashboard-grid">
+        <div class="card stat-card">
+            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px;">
+                <div class="stat-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h3>My Courses</h3>
+                <p class="stat-number">3</p>
+            </div>
+        </div>
+
+        <div class="card stat-card">
+            <div style="background: linear-gradient(135deg, #48bb78, #38a169); color: white; padding: 20px; border-radius: 15px;">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h3>Progress</h3>
+                <p class="stat-number">85%</p>
+            </div>
+        </div>
+
+        <!-- Add inside <div class="dashboard-grid"> -->
+        <div class="card stat-card">
+        <div style="background: linear-gradient(135deg, #4299e1, #3182ce); color: white; padding: 20px; border-radius: 15px;">
+            <div class="stat-icon"><i class="fas fa-flask"></i></div>
+            <h3>Lab Manuals</h3>
+            <p class="stat-number">5</p>
+        </div>
+        </div>
+
+        <div class="card stat-card">
+        <div style="background: linear-gradient(135deg, #38b2ac, #319795); color: white; padding: 20px; border-radius: 15px;">
+            <div class="stat-icon"><i class="fas fa-upload"></i></div>
+            <h3>Submissions</h3>
+            <p class="stat-number">2 Pending</p>
+        </div>
+        </div>
+
+        <div class="card stat-card">
+        <div style="background: linear-gradient(135deg, #ed64a6, #d53f8c); color: white; padding: 20px; border-radius: 15px;">
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+            <h3>Schedule</h3>
+            <p class="stat-number">3 Classes</p>
+        </div>
+        </div>
+
+        <div class="card stat-card">
+        <div style="background: linear-gradient(135deg, #805ad5, #6b46c1); color: white; padding: 20px; border-radius: 15px;">
+            <div class="stat-icon"><i class="fas fa-comments"></i></div>
+            <h3>Messages</h3>
+            <a href="{{ url_for('messages') }}" class="btn btn-secondary" style="margin-top:10px;">
+                <i class="fas fa-arrow-right"></i> Go to Chat
+            </a>
+        </div>
+        </div>
+
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="card">
+        <div class="card-body">
+            <h3 style="color: #667eea; margin-bottom: 20px;">
+                <i class="fas fa-tasks"></i> Recent Activities
+            </h3>
+            
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-check-circle" style="color: #48bb78;"></i>
+                </div>
+                <div class="activity-content">
+                    <strong>Completed Assignment: Web Development Basics</strong>
+                    <p class="activity-time">2 hours ago</p>
+                </div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-play-circle" style="color: #667eea;"></i>
+                </div>
+                <div class="activity-content">
+                    <strong>Started Course: Advanced JavaScript</strong>
+                    <p class="activity-time">Yesterday</p>
+                </div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-medal" style="color: #f6ad55;"></i>
+                </div>
+                <div class="activity-content">
+                    <strong>Earned Certificate: HTML5 Fundamentals</strong>
+                    <p class="activity-time">3 days ago</p>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-comments" style="color: #9f7aea;"></i>
+                </div>
+                <div class="activity-content">
+                    <strong>Participated in Discussion: React vs Vue</strong>
+                    <p class="activity-time">1 week ago</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card" style="margin-top: 30px;">
+        <div class="card-body">
+            <h3 style="color: #667eea; margin-bottom: 20px;">
+                <i class="fas fa-bolt"></i> Quick Actions
+            </h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-play"></i> Continue Learning
+                </a>
+                <a href="#" class="btn btn-success">
+                    <i class="fas fa-upload"></i> Submit Assignment
+                </a>
+                <a href="#" class="btn btn-warning">
+                    <i class="fas fa-calendar"></i> View Schedule
+                </a>
+                <a href="#" class="btn btn-secondary">
+                    <i class="fas fa-user-edit"></i> Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+Till now i have implemented this as my front end. created tables in supabase as instructed by you. Now i want to implement the following.Use the above codes as final templates:
+
+1. user registration. only fields stated in above register.html file
+2. user gets username and password on email. Full email credential implementation in app.py
+3. user logins via credentials received from email.
+4. after login user is directed to dashboard.html page. There user needs to change password and create a new password. This updated password to be stored in the database.new updated password to be used as credentials for logging again.Remains hashed in database.
+
+
+
+
+# @app.route("/register", methods=["GET", "POST"])
+# def register():
+#     if request.method == "POST":
+#         name = request.form.get("full_name")
+#         email = request.form.get("email")
+#         phone = request.form.get("phone")
+#         course = request.form.get("course")
+
+#         if not all([name, email, phone, course]):
+#             flash("All fields are required", "danger")
+#             return redirect(url_for("register"))
+
+#         # Check existing user
+#         try:
+#             existing = supabase.table("users").select("*").eq("email", email).execute()
+#             print("Existing user query:", existing.__dict__)
+#         except Exception as e:
+#             print("Error checking existing user:", e)
+#             flash("Database error. Try again later.", "danger")
+#             return redirect(url_for("register"))
+
+#         if existing.data:
+#             flash("An account with this email already exists.", "warning")
+#             return redirect(url_for("login"))
+
+#         username = generate_username()
+#         plain_password = generate_random_password(10)
+#         hashed_password = generate_password_hash(plain_password)
+
+#         # Insert new user
+        
+
+#         try:
+#             result = supabase.table("users").insert({
+#                 "id": str(uuid.uuid4()),
+#                 "name": name,
+#                 "email": email,
+#                 "username": username,
+#                 "password": hashed_password,
+#                 "created_at": datetime.utcnow().isoformat() ,       # <-- required if no default
+#                 "phone": phone,
+#                 "course": course,
+#                 "must_change_password": True
+
+#             }, returning='representation').execute()
+
+#             print("Insert raw result:", result.__dict__)  # <-- full debug output
+
+#             if not result.data:
+#                 flash("Registration failed: likely permission issue or RLS.", "danger")
+#                 return redirect(url_for("register"))
+    
+
+#             # Send credentials email
+#             try:
+#                 send_credentials_email(email, name, username, plain_password)
+#             except Exception as e:
+#                 print("Email send failed:", e)
+#                 flash("Registered but failed to send email.", "warning")
+
+#             flash("Registration successful! Check your email for credentials.", "success")
+#             return redirect(url_for("login"))
+
+#         except Exception as e:
+#             print("Supabase insert exception:", e)
+#             flash(f"Registration failed: {e}", "danger")
+#             return redirect(url_for("register"))
+
+#     return render_template("register.html")
+
+
+
+
+
+
+{% extends "base.html" %}
+
+{% block title %}Chat - EduLearn{% endblock %}
+
+{% block content %}
+<div class="chat-app">
+    <!-- Sidebar with users -->
+    <aside class="user-list">
+        <h3>Chats</h3>
+        <ul id="usersUl">
+            {% for user in users %}
+                {% if user.id != session['user_id'] %}
+                <li class="user-item" data-user-id="{{ user.id }}" data-user-name="{{ user.name | e }}">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name">{{ user.name }}</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <!-- Chat Window -->
+    <section class="chat-window">
+        <div id="chat-header" class="chat-header">
+            <h3 id="chatTitle">Select a user to chat with</h3>
+        </div>
+
+        <div id="chat-box" class="chat-box">
+            <!-- Messages will appear here -->
+        </div>
+
+        <form id="message-form" class="message-form">
+            <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" />
+            <button type="submit">Send</button>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script>
+    // expose to chat.js
+    const supabaseClient = supabase.createClient("{{ supabase_url }}", "{{ supabase_anon }}");
+    const userId = "{{ session['user_id'] }}";
+</script>
+
+<!-- Supabase UMD (needed for realtime only) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/index.min.js"></script>
+
+<!-- chat script (placed last so the DOM and the above vars are ready) -->
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}
+
+
+
+<!-- new 1 -->
+# --- New endpoint to set a server-side lockout timer ---
+@app.route('/api/set-lockout', methods=['GET']) # Using GET for simplicity from JS
+def set_lockout():
+    if 'user_id' in session:
+        # Lockout for 5 minutes (300 seconds)
+        session['lockout_until'] = time.time() + 300
+        session.modified = True # Ensure the session is saved
+    return jsonify({"success": True})
+
+
+
+    <!-- LOGIN ROUTE existing func -->
+
+    @app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+
+    # Handle POST
+    data = request.get_json() or request.form
+    username = data.get("moodle_id")
+    password = data.get("password")
+
+    if not username or not password:
+        return {"success": False, "message": "Username and password required"}, 400
+
+    try:
+        resp = supabase.table("users").select("*").eq("username", username).execute()
+    except Exception as e:
+        print("Supabase select error:", e)
+        return {"success": False, "message": "Database error"}, 500
+
+    if not resp.data:
+        return {"success": False, "message": "Invalid credentials"}, 400
+
+    user = resp.data[0]
+    if not check_password_hash(user["password"], password):
+        return {"success": False, "message": "Invalid credentials"}, 400
+
+    # Store session
+    session.permanent = True
+    session["user_id"] = user["id"]
+    session["username"] = user["username"]
+    session["name"] = user.get("name", "")
+
+    # If user must change password → redirect them there
+    if user.get("must_change_password", True):
+        return {
+            "success": True,
+            "must_change_password": True,
+            "message": "Please change your password",
+            "redirect": "/change-password"
+        }, 200
+
+    # Otherwise → go to dashboard
+    return {
+        "success": True,
+        "message": "Login successful",
+        "redirect": "/dashboard"
+    }, 200

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Chat{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-app">
+    <aside class="user-list">
+        <h3>Chats</h3>
+        <ul id="usersUl">
+            {% for user in users %}
+                <li class="user-item" data-user-id="{{ user.id }}" data-user-name="{{ user.name | e }}">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name">{{ user.name }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <section class="chat-window">
+        <header id="chat-header" class="chat-header">
+            <h3 id="chatTitle">Select a user to start chatting</h3>
+        </header>
+
+        <div id="chat-box" class="chat-box">
+            </div>
+
+        <form id="message-form" class="message-form">
+            <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" disabled/>
+            <button type="submit" disabled>Send</button>
+        </form>
+        <div id="moderation-warning" class="moderation-warning hidden">  
+            ⚠️ Please use respectful language.
+        </div>
+<!-- new add above -->
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+    // These globals are required by chat.js
+    const supabaseUrl = "{{ supabase_url }}";
+    const supabaseAnon = "{{ supabase_anon }}";
+    const userId = "{{ session['user_id'] }}";
+    
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnon);
+</script>
+
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

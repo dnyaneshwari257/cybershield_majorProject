@@ -1,0 +1,82 @@
+
+<!-- templates/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Login - EduLearn{% endblock %}
+
+{% block content %}
+<nav class="navbar">
+    <a href="{{ url_for('index') }}" class="navbar-brand">
+        <i class="fas fa-graduation-cap"></i> EduLearn
+    </a>
+</nav>
+
+<div class="container" style="margin-top: 80px;">
+    <div style="max-width: 400px; margin: 0 auto;">
+        <div class="card">
+            <div class="card-body">
+                <div class="page-header">
+                    <h2 class="page-title">
+                        <i class="fas fa-sign-in-alt"></i> Welcome Back
+                    </h2>
+                    <p class="page-subtitle">Sign in to continue your learning journey</p>
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-id-card"></i> Moodle ID
+                        </label>
+                        <input type="text" name="moodle_id" class="form-input" required 
+                               placeholder="EDU25001" maxlength="8" autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="password-input-container">
+                            <input type="password" name="password" id="password" class="form-input" 
+                                   required placeholder="Enter your password" autocomplete="current-password">
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me for 30 days</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-arrow-right"></i> Sign In
+                    </button>
+                </form>
+
+                <div class="form-divider">
+                    <p>New to EduLearn?</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo credentials info -->
+        <div class="card demo-card">
+            <div class="card-body">
+                <div class="demo-content">
+                    <h4 class="demo-title">
+                        <i class="fas fa-info-circle"></i> Demo Information
+                    </h4>
+                    <p class="demo-text">
+                        Register first to get your unique Moodle ID and password via email! <br>
+                        Your Moodle ID will be in format: EDU25001, EDU25002, etc.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

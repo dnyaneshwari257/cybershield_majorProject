@@ -1,0 +1,11 @@
+# Python virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Secret keys file
+# This is the line that protects your keys!
+.env
+
