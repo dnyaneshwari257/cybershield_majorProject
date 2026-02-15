@@ -138,8 +138,24 @@
                 // User List
                 const list = document.getElementById('user-list');
                 list.innerHTML = '';
+                
+                // Get the exact current time right now
+                const now = new Date();
+
                 data.offenders.forEach(u => {
-                    const status = u.lockout_until ? '<span class="text-red-500 font-bold">LOCKED</span>' : '<span class="text-green-500">Active</span>';
+                    let status = '<span class="text-green-500 font-bold">ACTIVE</span>';
+
+                    // Check if they have a lockout timestamp
+                    if (u.lockout_until) {
+                        // Convert the database timestamp into a real JavaScript Date object
+                        const lockoutDate = new Date(u.lockout_until);
+                        
+                        // If that lockout date is still in the future, keep them locked!
+                        if (lockoutDate > now) {
+                            status = '<span class="text-red-500 font-bold">LOCKED</span>';
+                        }
+                    }
+
                     list.innerHTML += `
                         <div class="grid grid-cols-3 p-2 bg-slate-700/20 rounded border border-slate-700 items-center">
                             <div class="font-bold text-slate-200">${u.username}</div>

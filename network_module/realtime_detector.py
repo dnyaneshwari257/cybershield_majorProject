@@ -86,9 +86,10 @@ def monitor():
                 preds = model.predict(features)
 
                 for ip, pred, req_rate in zip(features.index, preds, features['request_rate']):
-                    if pred == -1:
+                    # MINIMUM THREAT THRESHOLD: 
+    # Only trust the AI's anomaly detection if traffic exceeds 50 req/sec
+                    if pred == -1 and req_rate > 50:
                         print(f"\n[!!!] ALERT: DDoS Attack Detected from {ip}!")
-                        print(f"      Intensity: {req_rate} req/sec")
 
                         # === 1. PUSH ALERT TO ADMIN DASHBOARD ===
                         if ip not in alerted_ips:

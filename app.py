@@ -71,27 +71,21 @@ INTERNAL_API_KEY = "CyberShield_WAF_Secret_998877" # Security measure
 
 @app.before_request
 def active_firewall():
-    """
-    LAYER 7 MITIGATION: Drops malicious IPs in nanoseconds.
-    Includes a Whitelist to prevent locking out the Admin Command Center.
-    """
-    # 1. Define safe routes that should NEVER be blocked
     whitelisted_routes = [
         '/admin_dashboard',
         '/api/admin_dashboard/network',
         '/api/admin_dashboard/bullying',
         '/api/internal/block_ip',
-        '/static' # Allow CSS/JS files to load on the dashboard
+        '/static'
     ]
     
-    # 2. Check if the current request is trying to access a safe route
-    # request.path.startswith allows /static/css/style.css to pass
     for route in whitelisted_routes:
         if request.path.startswith(route):
-            return # Let the admin through safely!
+            return
 
-    # 3. If it's a normal route (like the homepage, login, or chat), apply the blocklist
-    if request.remote_addr in BANNED_IPS:
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+
+    if client_ip in BANNED_IPS:
         abort(403, description="Connection Dropped: IP blocked by CyberShield AI.")
 
 @app.route('/api/internal/block_ip', methods=['POST'])

@@ -35,14 +35,12 @@ def log_request_info(response):
     Logs request details using a thread-safe rotating file handler.
     """
     try:
-        ip = request.remote_addr
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
         endpoint = request.path
         method = request.method
         status_code = response.status_code
         content_length = response.content_length if response.content_length else 0
         
-        # Message content: IP,Endpoint,Method,Status,Size
-        # (Timestamp is added automatically by the formatter)
         log_message = f"{ip},{endpoint},{method},{status_code},{content_length}"
         
         logger.info(log_message)
