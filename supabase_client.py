@@ -6,17 +6,13 @@ from dotenv import load_dotenv
 
 # load_dotenv()
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-
-print("SUPABASE_URL:", SUPABASE_URL)
-print("SUPABASE_KEY:", SUPABASE_KEY)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise Exception("Supabase environment variables missing")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 # Test connection
 def test_supabase_connection():
     try:
