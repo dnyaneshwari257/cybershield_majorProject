@@ -11,7 +11,4 @@ supabase
 requests
 python-dotenv
 flask-mail
-pandas
-scikit-learn
-joblib
 python-dateutil
