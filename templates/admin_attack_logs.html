@@ -79,7 +79,6 @@ const res=await fetch(url)
 const data=await res.json()
 
 const table=document.getElementById("attackTable")
-
 table.innerHTML=""
 
 data.forEach(a=>{
@@ -91,7 +90,7 @@ table.innerHTML += `
 ${a.ip_address}
 </td>
 
-<td class="px-10 py-3 text-center ">
+<td class="px-10 py-3 text-center">
 ${a.location}
 </td>
 
@@ -131,8 +130,6 @@ Unblock
 
 async function unblock(ip,id){
 
-async function unblock(ip,id){
-
 const res = await fetch("/api/admin_dashboards/unblock_ip",{
 method:"POST",
 headers:{
@@ -144,14 +141,13 @@ body:JSON.stringify({ip:ip,id:id})
 const data = await res.json()
 
 if(data.success){
-
 alert("IP unblocked successfully")
 loadAttacks()
-
 }
 
 }
 
+// load logs automatically when page opens
 loadAttacks()
 
 </script>
