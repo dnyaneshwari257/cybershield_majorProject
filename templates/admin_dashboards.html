@@ -2,9 +2,7 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<span class="text-sm text-slate-300">
-Welcome, Admin
-</span>
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
 <!-- NETWORK GRAPH -->
@@ -43,19 +41,9 @@ Welcome, Admin
 <i class="fa-solid fa-triangle-exclamation mr-2"></i>Threat Detected
 </h2>
 
-<div class="space-y-2 text-sm">
+<div id="threat-feed" class="space-y-3 text-sm">
 
-<p><b>IP Address:</b> <span id="attackIP">None</span></p>
-
-<p><b>Location:</b> <span id="attackLocation">Unknown</span></p>
-
-<p><b>Attack Type:</b> <span id="attackType">None</span></p>
-
-<p><b>Severity:</b> <span id="attackSeverity">Low</span></p>
-
-<p><b>Status:</b> <span id="attackStatus">Safe</span></p>
-
-<p><b>Time:</b> <span id="attackTime">—</span></p>
+<p class="text-slate-400">No threats detected</p>
 
 </div>
 
@@ -91,7 +79,37 @@ animation:false
 
 })
 
+function updateThreatFeed(attacks){
 
+const container = document.getElementById("threat-feed");
+
+container.innerHTML = "";
+
+if(!attacks || attacks.length === 0){
+
+container.innerHTML = "<p class='text-slate-400'>No threats detected</p>";
+return;
+
+}
+
+attacks.forEach(a => {
+
+container.innerHTML += `
+<div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+
+<p><b>Attack:</b> ${a.attack_type}</p>
+<p><b>IP:</b> ${a.ip_address}</p>
+<p><b>Location:</b> ${a.location}</p>
+<p><b>Severity:</b> ${a.severity}</p>
+<p><b>Status:</b> ${a.blocked ? "Blocked" : "Active"}</p>
+<p><b>Time:</b> ${new Date(a.timestamp).toLocaleString()}</p>
+
+</div>
+`;
+
+});
+
+}
 
 async function updateDashboard(){
 

@@ -75,13 +75,19 @@ def active_firewall():
         '/api/admin_dashboards/network',
         '/api/admin_dashboards/bullying',
         '/api/internal/block_ip',
-        '/static'
+        '/static',
+        '/api/admin_dashboards',
+        '/admin_attack_logs',
+        '/admin_users',
+        '/admin_incidents'
     ]
     
     for route in whitelisted_routes:
         if request.path.startswith(route):
             return
-
+    if session.get("admin"):
+        return
+    
     client_ip = request.headers.get("X-Forwarded-For")
 
     if client_ip:
@@ -974,7 +980,7 @@ def api_network():
                     # -------------------------
                     # GET ATTACKER IP
                     # -------------------------
-                    client_ip = request.headers.get("X-Forwarded-For", request.remote_addr).split(",")[0]
+                    client_ip = request.headers.get("X-Forwarded-For")
 
                     if client_ip:
                         client_ip = client_ip.split(",")[0].strip()
@@ -1030,11 +1036,16 @@ def api_network():
     # =============================
     try:
 
+        recent_time = (datetime.utcnow() - timedelta(seconds=10)).isoformat()
+
         res = supabase.table("attack_logs") \
             .select("*") \
+            .gte("timestamp", recent_time) \
             .order("timestamp", desc=True) \
-            .limit(1) \
+            .limit(2) \
             .execute()
+
+        data["attacks"] = res.data if res.data else []
 
         if res.data:
 

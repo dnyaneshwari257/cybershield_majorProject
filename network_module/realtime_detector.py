@@ -16,7 +16,7 @@ LOG_FILE = r"C:\Users\Nilesh\Desktop\cybercopy_dnyaneshwari\cybershield_majorPro
 MODEL_FILE = "network_model.pkl"
 
 # WAF API Configuration
-WAF_ENDPOINT = "http://127.0.0.1:5000/api/internal/block_ip"
+WAF_ENDPOINT = "https://cybershield-majorproject.onrender.com/api/internal/block_ip"
 INTERNAL_API_KEY = "CyberShield_WAF_Secret_998877"
 
 
