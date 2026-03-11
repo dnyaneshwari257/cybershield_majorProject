@@ -131,25 +131,27 @@ Unblock
 
 async function unblock(ip,id){
 
-await fetch("/api/admin_dashboards/unblock_ip",{
+async function unblock(ip,id){
+
+const res = await fetch("/api/admin_dashboards/unblock_ip",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({ip:ip,id:id})
 })
+
 const data = await res.json()
 
 if(data.success){
 
 alert("IP unblocked successfully")
-location.reload()
-
-
 loadAttacks()
 
+}
 
 }
+
 loadAttacks()
 
 </script>
