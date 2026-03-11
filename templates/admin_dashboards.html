@@ -55,12 +55,12 @@
 
 <script>
 
+
+
 const ctx = document.getElementById("trafficChart").getContext("2d")
 
 const chart = new Chart(ctx,{
-
 type:"line",
-
 data:{
 labels:Array(20).fill(""),
 datasets:[{
@@ -71,12 +71,10 @@ fill:true,
 tension:0.4
 }]
 },
-
 options:{
 plugins:{legend:{display:false}},
 animation:false
 }
-
 })
 
 function updateThreatFeed(attacks){
@@ -116,9 +114,7 @@ async function updateDashboard(){
 try{
 
 const res = await fetch("/api/admin_dashboards/network")
-
 const data = await res.json()
-
 
 
 /* ---------- GRAPH UPDATE ---------- */
@@ -126,16 +122,15 @@ const data = await res.json()
 const arr = chart.data.datasets[0].data
 
 arr.shift()
-
 arr.push(data.rps)
 
 chart.update()
 
 
-
 /* ---------- LOAD VALUE ---------- */
 
 document.getElementById("rps").innerText = data.rps
+
 if(data.rps > 50){
 chart.data.datasets[0].borderColor="#ef4444"
 }else{
@@ -146,31 +141,13 @@ chart.data.datasets[0].borderColor="#3b82f6"
 /* ---------- LAST ALERT ---------- */
 
 if(data.latest_alert){
-
 document.getElementById("lastAlert").innerText = data.latest_alert
-
 }
-
 
 
 /* ---------- THREAT PANEL ---------- */
 
-if(data.latest_ip){
-
-document.getElementById("attackIP").innerText = data.latest_ip
-
-document.getElementById("attackLocation").innerText = data.location
-
-document.getElementById("attackType").innerText = data.latest_attack
-
-document.getElementById("attackSeverity").innerText = data.severity
-
-document.getElementById("attackStatus").innerText = data.blocked ? "Blocked" : "Active"
-
-document.getElementById("attackTime").innerText =
-new Date(data.time).toLocaleString()
-
-}
+updateThreatFeed(data.attacks)
 
 }catch(e){
 
@@ -180,14 +157,11 @@ console.error(e)
 
 }
 
-
-
 /* ---------- REAL TIME REFRESH ---------- */
 
 setInterval(updateDashboard,1000)
 
-
-
 </script>
+
 
 {% endblock %}
