@@ -131,10 +131,17 @@ chart.update()
 
 document.getElementById("rps").innerText = data.rps
 
-if(data.rps > 50){
-chart.data.datasets[0].borderColor="#ef4444"
-}else{
-chart.data.datasets[0].borderColor="#3b82f6"
+if(data.status === "UNDER ATTACK"){
+
+chart.data.datasets[0].borderColor = "#ef4444"
+chart.data.datasets[0].backgroundColor = "rgba(239,68,68,0.2)"
+
+}
+else{
+
+chart.data.datasets[0].borderColor = "#3b82f6"
+chart.data.datasets[0].backgroundColor = "rgba(59,130,246,0.2)"
+
 }
 
 

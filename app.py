@@ -106,8 +106,28 @@ LOGIN_ATTEMPTS = {}
 BLOCKED_LOGINS = {}
 @app.before_request
 def active_firewall():
+    client_ip = request.headers.get("CF-Connecting-IP") \
+            or request.headers.get("True-Client-IP") \
+            or request.headers.get("X-Forwarded-For") \
+            or request.remote_addr
+
+    if client_ip and "," in client_ip:
+            client_ip = client_ip.split(",")[0].strip()
+
+    if client_ip.startswith("::ffff:"):
+            client_ip = client_ip.replace("::ffff:", "")
+
+    if client_ip in BANNED_IPS:
+
+        return """
+            <h1 style='text-align:center;margin-top:100px;color:red'>
+            🚫 Your IP is blocked. You cannot access the CyberShield website.
+            </h1>
+            """, 403
+           
     print("HEADERS:", dict(request.headers))
     print("CLIENT IP:", get_client_ip())
+    
     whitelisted_routes = [
         '/admin_dashboards',
         '/api/admin_dashboards/network',
@@ -1021,6 +1041,10 @@ def api_network():
         "time": None,
         "attacks": []
     }
+    if client_ip in BANNED_IPS:
+        data["status"] = "Blocked"
+    else:
+        data["status"] = "Normal"
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     LOG_FILE = os.path.join(BASE_DIR, 'server_traffic.log')
@@ -1078,7 +1102,7 @@ def api_network():
 
                         BANNED_IPS.add(client_ip)
                         print(f"[WAF] IP BLOCKED: {client_ip}")
-
+                        
                     # -------------------------
                     # PREVENT DUPLICATE LOGS
                     # -------------------------

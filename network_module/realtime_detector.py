@@ -145,31 +145,25 @@ def monitor():
 
                 attack_type = None
 
-                # ================= DDOS =================
-                if req_rate > 80:
-
-                    attack_type = "DDoS"
-
                 # ================= PORT SCAN =================
-                elif err_rate > 0.7 and req_rate > 20:
-
+                if err_rate > 0.7 and uniq_ep > 10:
                     attack_type = "Port Scan"
 
                 # ================= ENDPOINT FLOOD =================
                 elif uniq_ep > 15 and req_rate > 30:
-
                     attack_type = "Endpoint Flood"
 
                 # ================= RECONNAISSANCE =================
-                elif uniq_ep > 10 and err_rate > 0.5:
-
+                elif uniq_ep > 8 and err_rate > 0.5:
                     attack_type = "Reconnaissance"
+
+                # ================= DDOS =================
+                elif req_rate > 80:
+                    attack_type = "DDoS"
 
                 # ================= ML ANOMALY =================
                 elif pred == -1 and req_rate > 50:
-
                     attack_type = "Network Anomaly"
-
                 if not attack_type:
                     continue
 
