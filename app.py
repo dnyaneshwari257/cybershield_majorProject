@@ -62,21 +62,20 @@ BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
 
 
 def get_client_ip():
-    """
-    Extract real client IP behind proxies (Render / Railway / Nginx)
-    """
+    # Cloudflare real client IP
+    if request.headers.get("CF-Connecting-IP"):
+        ip = request.headers.get("CF-Connecting-IP")
 
-    if "X-Forwarded-For" in request.headers:
+    # fallback
+    elif request.headers.get("True-Client-IP"):
+        ip = request.headers.get("True-Client-IP")
 
-        forwarded_ips = request.headers.get("X-Forwarded-For")
-
-        # take FIRST IP (real client)
-        ip = forwarded_ips.split(",")[0].strip()
+    elif request.headers.get("X-Forwarded-For"):
+        ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
 
     else:
         ip = request.remote_addr
 
-    # normalize IPv6
     if ip.startswith("::ffff:"):
         ip = ip.replace("::ffff:", "")
 
