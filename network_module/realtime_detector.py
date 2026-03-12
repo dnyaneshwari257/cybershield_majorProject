@@ -48,19 +48,13 @@ def get_last_n_lines(file_path, n=500):
 def get_ip_details(ip):
     
     try:
-
         res = requests.get(f"http://ip-api.com/json/{ip}")
-
         data = res.json()
-
         location = f'{data.get("city","Unknown")}, {data.get("country","Unknown")}'
-
         ipv4 = data.get("query")   # API automatically returns IPv4 if available
-
         return ipv4, location
 
     except:
-
         return ip, "Unknown"
 
 def calculate_severity(req_rate):
@@ -81,7 +75,7 @@ def calculate_severity(req_rate):
 # ================= MAIN MONITOR =================
 
 def monitor():
-
+    
     if not os.path.exists(MODEL_FILE):
         print("Error: Model not found! Run train_model.py first.")
         return
@@ -115,109 +109,165 @@ def monitor():
             df = pd.read_csv(io.StringIO(raw_data), names=COLUMNS)
 
             current_time = time.time()
+
+            # last 10 seconds traffic
             recent_traffic = df[df['timestamp'] > (current_time - 10)]
 
             print(f"Active Lines (10s): {len(recent_traffic)}")
 
-            if not recent_traffic.empty:
+            if recent_traffic.empty:
+                time.sleep(2)
+                continue
 
-                features = recent_traffic.groupby('ip').agg({
-                    'endpoint': 'count',
-                    'status_code': lambda x: (x >= 400).mean(),
-                    'content_length': 'sum'
-                })
+            # ================= FEATURE EXTRACTION =================
 
-                features.columns = ['request_rate', 'error_rate', 'byte_count']
+            features = recent_traffic.groupby('ip').agg({
 
-                preds = model.predict(features)
+                'endpoint': ['count', pd.Series.nunique],
+                'status_code': lambda x: (x >= 400).mean(),
+                'content_length': 'sum'
 
-                for ip, pred, req_rate in zip(features.index, preds, features['request_rate']):
+            })
 
-                    # Minimum threat threshold
-                    if pred == -1 and req_rate > 50:
+            features.columns = ['request_rate', 'unique_endpoints', 'error_rate', 'byte_count']
 
-                        print(f"\n[!!!] ALERT: DDoS Attack Detected from {ip}")
+            preds = model.predict(features[['request_rate','error_rate','byte_count']])
 
-                        # Get location
-                        ipv4, location = get_ip_details(ip)
+            # ================= DETECTION LOOP =================
 
-                        # Determine severity
-                        severity = calculate_severity(req_rate)
+            for ip, pred, req_rate, uniq_ep, err_rate in zip(
 
-                        # ================= SAVE ATTACK LOG =================
-                        try:
+                    features.index,
+                    preds,
+                    features['request_rate'],
+                    features['unique_endpoints'],
+                    features['error_rate']):
 
-                            supabase.table('attack_logs').insert({
+                attack_type = None
 
-                                "ip_address": ipv4,
-                                "location": location,
-                                "attack_type": "DDoS",
-                                "severity": severity,
-                                "intensity": f"{req_rate} req/sec",
-                                "blocked": True
+                # ================= DDOS =================
+                if req_rate > 80:
 
-                            }).execute()
+                    attack_type = "DDoS"
 
-                            print("      [DB] Attack stored in attack_logs.")
+                # ================= PORT SCAN =================
+                elif err_rate > 0.7 and req_rate > 20:
 
-                        except Exception as e:
+                    attack_type = "Port Scan"
 
-                            print(f"      [DB Error] {e}")
+                # ================= ENDPOINT FLOOD =================
+                elif uniq_ep > 15 and req_rate > 30:
 
-                        # ================= PUSH ALERT TO CLOUD =================
-                        if ip not in alerted_ips:
+                    attack_type = "Endpoint Flood"
 
-                            try:
+                # ================= RECONNAISSANCE =================
+                elif uniq_ep > 10 and err_rate > 0.5:
 
-                                supabase.table('network_alerts').insert({
+                    attack_type = "Reconnaissance"
 
-                                    "ip_address": ip,
-                                    "attack_type": "Volumetric DDoS",
-                                    "intensity": f"{req_rate} req/sec"
+                # ================= ML ANOMALY =================
+                elif pred == -1 and req_rate > 50:
 
-                                }).execute()
+                    attack_type = "Network Anomaly"
 
-                                print("      [Cloud] Alert pushed to Supabase.")
+                if not attack_type:
+                    continue
 
-                                alerted_ips.add(ip)
+                print(f"[ALERT] {attack_type} detected from {ip}")
 
-                            except Exception as e:
+                # ================= GET GEO LOCATION =================
 
-                                print(f"      [Cloud Error] {e}")
+                ipv4, location = get_ip_details(ip)
 
-                        # ================= TRIGGER WAF BLOCK =================
-                        try:
+                severity = calculate_severity(req_rate)
 
-                            headers = {"X-API-KEY": INTERNAL_API_KEY}
+                # ================= STORE ATTACK LOG =================
 
-                            payload = {"ip": ip}
+                try:
 
-                            res = requests.post(
-                                WAF_ENDPOINT,
-                                json=payload,
-                                headers=headers,
-                                timeout=2
-                            )
+                    existing = supabase.table("attack_logs") \
+                        .select("ip_address") \
+                        .eq("ip_address", ipv4) \
+                        .order("timestamp", desc=True) \
+                        .limit(1) \
+                        .execute()
 
-                            if res.status_code == 200:
+                    if not existing.data:
 
-                                print(f"      [Defense] WAF blocked {ip}")
+                        supabase.table('attack_logs').insert({
 
-                            else:
+                            "ip_address": ipv4,
+                            "location": location,
+                            "attack_type": attack_type,
+                            "severity": severity,
+                            "blocked": True,
+                            "timestamp": datetime.utcnow().isoformat()
 
-                                print(f"      [Defense Warning] {res.status_code}")
+                        }).execute()
 
-                        except Exception as e:
+                        print("[DB] Attack stored")
 
-                            print(f"      [Defense Error] {e}")
+                except Exception as e:
+
+                    print("DB Error:", e)
+
+                # ================= BLOCK IP =================
+
+                try:
+
+                    headers = {"X-API-KEY": INTERNAL_API_KEY}
+
+                    payload = {"ip": ip}
+
+                    res = requests.post(
+
+                        WAF_ENDPOINT,
+                        json=payload,
+                        headers=headers,
+                        timeout=2
+
+                    )
+
+                    if res.status_code == 200:
+
+                        print(f"[WAF] IP blocked: {ip}")
+
+                    else:
+
+                        print(f"[WAF Warning] Status {res.status_code}")
+
+                except Exception as e:
+
+                    print("WAF Error:", e)
+
+                # ================= CLOUD ALERT =================
+
+                try:
+
+                    if ip not in alerted_ips:
+
+                        supabase.table('network_alerts').insert({
+
+                            "ip_address": ip,
+                            "attack_type": attack_type,
+                            "intensity": f"{req_rate} req/sec"
+
+                        }).execute()
+
+                        alerted_ips.add(ip)
+
+                        print("[Cloud] Alert pushed")
+
+                except Exception as e:
+
+                    print("Cloud Error:", e)
 
             time.sleep(2)
 
         except Exception as e:
 
-            print(f"Error: {e}")
-            time.sleep(1)
-
+            print("Monitor Error:", e)
+            time.sleep(2)
 
 # ================= ENTRY POINT =================
 
