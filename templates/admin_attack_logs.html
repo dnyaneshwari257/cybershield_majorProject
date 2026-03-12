@@ -25,8 +25,6 @@ Select Attack Type:
 <option value="Brute Force">Brute Force</option>
 <option value="Port Scan">Port Scan</option>
 
-
-
 <button onclick="loadAttacks()" class="bg-blue-600 px-4 py-2 rounded">
 Filter
 </button>
@@ -81,6 +79,7 @@ const res=await fetch(url)
 const data=await res.json()
 
 const table=document.getElementById("attackTable")
+
 table.innerHTML=""
 
 data.forEach(a=>{
@@ -143,15 +142,19 @@ body:JSON.stringify({ip:ip})
 const data = await res.json()
 
 if(data.success){
+
 alert("IP unblocked successfully")
+
 loadAttacks()
-}
 
 }
 
-// load logs automatically when page opens
+}
+
+// LOAD TABLE WHEN PAGE OPENS
+document.addEventListener("DOMContentLoaded",function(){
 loadAttacks()
+})
 
 </script>
-
 {% endblock %}
