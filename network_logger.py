@@ -51,10 +51,18 @@ def get_client_ip():
 
 # ===== LOG REQUEST =====
 def log_request_info(response):
+    ip = get_client_ip()
 
+    if ip in BANNED_IPS:
+        return response
     try:
+        from app import BANNED_IPS   # <-- ADD HERE (inside function)
 
         ip = get_client_ip()
+
+        # Ignore requests from already blocked IPs
+        if ip in BANNED_IPS:
+            return response
         endpoint = request.path
         method = request.method
         status_code = response.status_code

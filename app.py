@@ -124,16 +124,30 @@ def active_firewall():
     
     for route in whitelisted_routes:
         if request.path.startswith(route):
-            return
+            return None
     if session.get("admin"):
-        return
+        return None
     
     client_ip = get_client_ip()
 
+     # BLOCK ATTACKER
     if client_ip in BANNED_IPS:
-        return jsonify({
-            "error":"Access denied. Your IP has been blocked by CyberShield."
-        }),403
+
+        print(f"[WAF] BLOCKED REQUEST from {client_ip}")
+
+        return (
+            """
+            <html>
+            <head><title>Access Denied</title></head>
+            <body style="background:#0f172a;color:white;text-align:center;padding-top:120px;font-family:Arial;">
+            <h1 style="color:red;">🚫 ACCESS DENIED</h1>
+            <h2>Your IP has been blocked by CyberShield</h2>
+            <p>Malicious activity detected.</p>
+            </body>
+            </html>
+            """,
+            403
+        )
 
 @app.route('/api/internal/block_ip', methods=['POST'])
 def internal_block_ip():
@@ -1039,11 +1053,19 @@ def api_network():
                 count = 0
 
                 for line in lines:
-
+                    
                     try:
+
                         parts = line.split(',')
 
-                        if float(parts[0]) > (now - 5):
+                        timestamp = float(parts[0])
+                        ip = parts[1]
+
+                        # Ignore blocked attacker traffic
+                        if ip in BANNED_IPS:
+                            continue
+
+                        if timestamp > (now - 5):
                             count += 1
 
                     except:
@@ -1056,7 +1078,7 @@ def api_network():
                 # =============================
                 if count > 30:
 
-                    data["status"] = "UNDER ATTACK"
+                    data["status"] = "HIGH TRAFFIC"
 
                     # -------------------------
                     # GET ATTACKER IP (Render Safe)
