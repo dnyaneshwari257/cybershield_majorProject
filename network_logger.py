@@ -3,7 +3,7 @@ from logging.handlers import RotatingFileHandler
 from flask import request
 import os
 
-# === 1. FORCE ABSOLUTE PATH ===
+# ===== LOG FILE PATH =====
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILENAME = os.path.join(BASE_DIR, 'server_traffic.log')
 
@@ -11,11 +11,15 @@ print("--------------------------------------------------")
 print(f"[LOGGER] Saving log file to: {LOG_FILENAME}")
 print("--------------------------------------------------")
 
-# === 2. Configure Logger ===
+# ===== LOGGER SETUP =====
 logger = logging.getLogger('TrafficLogger')
 logger.setLevel(logging.INFO)
 
-handler = RotatingFileHandler(LOG_FILENAME, maxBytes=100_000_000, backupCount=5)
+handler = RotatingFileHandler(
+    LOG_FILENAME,
+    maxBytes=100_000_000,
+    backupCount=5
+)
 
 formatter = logging.Formatter('%(created)f,%(message)s')
 handler.setFormatter(formatter)
@@ -24,38 +28,37 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 
+# ===== GET REAL CLIENT IP =====
 def get_client_ip():
-    """
-    Extract the real client IP (works with ngrok, proxies, IPv6).
-    """
 
-    ip = request.headers.get("X-Forwarded-For")
+    if request.headers.get("CF-Connecting-IP"):
+        ip = request.headers.get("CF-Connecting-IP")
 
-    if ip:
-        ip = ip.split(",")[0].strip()
+    elif request.headers.get("True-Client-IP"):
+        ip = request.headers.get("True-Client-IP")
+
+    elif request.headers.get("X-Forwarded-For"):
+        ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
+
     else:
         ip = request.remote_addr
 
-    # Convert IPv6 mapped IPv4
     if ip and ip.startswith("::ffff:"):
         ip = ip.replace("::ffff:", "")
 
     return ip
 
 
+# ===== LOG REQUEST =====
 def log_request_info(response):
-    """
-    Logs request details using rotating file handler.
-    """
 
     try:
 
         ip = get_client_ip()
-
         endpoint = request.path
         method = request.method
         status_code = response.status_code
-        content_length = response.content_length if response.content_length else 0
+        content_length = response.content_length or 0
 
         log_message = f"{ip},{endpoint},{method},{status_code},{content_length}"
 
