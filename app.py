@@ -62,12 +62,21 @@ BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
 
 
 def get_client_ip():
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        ip = forwarded.split(",")[0].strip()
+    """
+    Extract real client IP behind proxies (Render / Railway / Nginx)
+    """
+
+    if "X-Forwarded-For" in request.headers:
+
+        forwarded_ips = request.headers.get("X-Forwarded-For")
+
+        # take FIRST IP (real client)
+        ip = forwarded_ips.split(",")[0].strip()
+
     else:
         ip = request.remote_addr
 
+    # normalize IPv6
     if ip.startswith("::ffff:"):
         ip = ip.replace("::ffff:", "")
 
@@ -98,6 +107,8 @@ LOGIN_ATTEMPTS = {}
 BLOCKED_LOGINS = {}
 @app.before_request
 def active_firewall():
+    print("HEADERS:", dict(request.headers))
+    print("CLIENT IP:", get_client_ip())
     whitelisted_routes = [
         '/admin_dashboards',
         '/api/admin_dashboards/network',
