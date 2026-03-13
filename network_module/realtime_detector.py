@@ -123,54 +123,57 @@ def monitor():
 
             features = recent_traffic.groupby('ip').agg({
 
-                'endpoint': ['count', pd.Series.nunique],
+                'endpoint': ['count', pd.Series.nunique, lambda x: x.mode()[0]],
                 'status_code': lambda x: (x >= 400).mean(),
                 'content_length': 'sum'
 
             })
-
-            features.columns = ['request_rate', 'unique_endpoints', 'error_rate', 'byte_count']
+            features.columns = [
+                'request_rate',
+                'unique_endpoints',
+                'top_endpoint',
+                'error_rate',
+                'byte_count'
+            ]
 
             preds = model.predict(features[['request_rate','error_rate','byte_count']])
 
             # ================= DETECTION LOOP =================
 
-            for ip, pred, req_rate, uniq_ep, err_rate in zip(
+            for ip in features.index:
+    
+                req_rate = features.loc[ip]['request_rate']
+                uniq_ep = features.loc[ip]['unique_endpoints']
+                err_rate = features.loc[ip]['error_rate']
+                top_ep = features.loc[ip]['top_endpoint']
 
-                    features.index,
-                    preds,
-                    features['request_rate'],
-                    features['unique_endpoints'],
-                    features['error_rate']):
+                print(f"IP:{ip}  Rate:{req_rate}  Unique:{uniq_ep}  Top:{top_ep}  Error:{err_rate}")
 
                 # ================= DETECTION LOGIC =================
 
                 attack_type = None
 
-                # -------- PORT SCAN --------
-                if uniq_ep >= 10 and err_rate > 0.6:
+                # BRUTE FORCE
+                if top_ep == "/login" and req_rate > 8 and err_rate > 0.5:
+                    attack_type = "Brute Force"
+
+                # PORT SCAN
+                elif uniq_ep >= 10 and err_rate > 0.6:
                     attack_type = "Port Scan"
 
-                # -------- RECONNAISSANCE --------
+                # RECON
                 elif 5 <= uniq_ep < 10 and err_rate > 0.5 and req_rate < 40:
                     attack_type = "Reconnaissance"
 
-                # -------- BRUTE FORCE --------
-                elif req_rate > 10 and uniq_ep <= 2 and err_rate > 0.5:
-                    attack_type = "Brute Force"
-
-                # -------- ENDPOINT FLOOD --------
+                # ENDPOINT FLOOD
                 elif uniq_ep > 5 and req_rate > 40:
                     attack_type = "Endpoint Flood"
 
-                # -------- DOS --------
+                # DOS
                 elif req_rate > 120:
                     attack_type = "DoS Attack"
-
-                # -------- ML fallback --------
-                elif pred == -1:
-                    attack_type = "Network Anomaly"
                 print(f"[ALERT] {attack_type} detected from {ip}")
+                
 
                 # ================= GET GEO LOCATION =================
 
