@@ -121,13 +121,13 @@ def monitor():
 
             # ================= FEATURE EXTRACTION =================
 
-            features = recent_traffic.groupby('ip').agg({
-
-                'endpoint': ['count', pd.Series.nunique, lambda x: x.mode()[0]],
-                'status_code': lambda x: (x >= 400).mean(),
-                'content_length': 'sum'
-
-            })
+            features = recent_traffic.groupby('ip').agg(
+                request_rate=('endpoint', 'count'),
+                unique_endpoints=('endpoint', pd.Series.nunique),
+                top_endpoint=('endpoint', lambda x: x.mode().iloc[0]),
+                error_rate=('status_code', lambda x: (x >= 400).mean()),
+                byte_count=('content_length', 'sum')
+            )
             features.columns = [
                 'request_rate',
                 'unique_endpoints',
@@ -148,27 +148,27 @@ def monitor():
                 top_ep = features.loc[ip]['top_endpoint']
 
                 print(f"IP:{ip}  Rate:{req_rate}  Unique:{uniq_ep}  Top:{top_ep}  Error:{err_rate}")
-                
+
                 attack_type = None
 
-                # -------- BRUTE FORCE --------
-                if top_ep == "/login" and uniq_ep == 1 and req_rate > 8:
+                # --- BRUTE FORCE ---
+                if top_ep == "/login" and uniq_ep == 1 and req_rate >= 8:
                     attack_type = "Brute Force"
 
-                # -------- PORT SCAN --------
-                elif uniq_ep >= 12 and req_rate < 60 and err_rate > 0.6:
+                # --- PORT SCAN ---
+                elif uniq_ep >= 10 and err_rate >= 0.6 and req_rate < 80:
                     attack_type = "Port Scan"
 
-                # -------- RECON --------
-                elif 5 <= uniq_ep < 12 and req_rate < 20:
+                # --- RECON ---
+                elif 4 <= uniq_ep < 10 and req_rate < 25:
                     attack_type = "Reconnaissance"
 
-                # -------- ENDPOINT FLOOD --------
-                elif uniq_ep >= 5 and req_rate >= 60 and req_rate < 120:
+                # --- ENDPOINT FLOOD ---
+                elif uniq_ep >= 5 and req_rate >= 80 and req_rate < 150:
                     attack_type = "Endpoint Flood"
 
-                # -------- DOS --------
-                elif req_rate >= 120:
+                # --- DOS ---
+                elif req_rate >= 150:
                     attack_type = "DoS Attack"
                 print(f"[ALERT] {attack_type} detected from {ip}")
                 
