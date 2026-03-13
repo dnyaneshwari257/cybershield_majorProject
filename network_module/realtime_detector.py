@@ -147,28 +147,28 @@ def monitor():
 
                 attack_type = None
 
-                # BRUTE FORCE
-                if req_rate > 10 and uniq_ep <= 2 and err_rate > 0.5:
-                    attack_type = "Brute Force"
-
-                # PORT SCAN
-                elif uniq_ep > 12 and err_rate > 0.7:
+                # -------- PORT SCAN --------
+                if uniq_ep >= 10 and err_rate > 0.6:
                     attack_type = "Port Scan"
 
-                # RECONNAISSANCE
-                elif 6 <= uniq_ep <= 12 and err_rate > 0.5 and req_rate < 20:
+                # -------- RECONNAISSANCE --------
+                elif 5 <= uniq_ep < 10 and err_rate > 0.5 and req_rate < 40:
                     attack_type = "Reconnaissance"
 
-                # ENDPOINT FLOOD
-                elif uniq_ep > 8 and req_rate > 30:
+                # -------- BRUTE FORCE --------
+                elif req_rate > 10 and uniq_ep <= 2 and err_rate > 0.5:
+                    attack_type = "Brute Force"
+
+                # -------- ENDPOINT FLOOD --------
+                elif uniq_ep > 5 and req_rate > 40:
                     attack_type = "Endpoint Flood"
 
-                # DOS / DDOS
-                elif req_rate > 80:
+                # -------- DOS --------
+                elif req_rate > 120:
                     attack_type = "DoS Attack"
 
-                # ML anomaly fallback
-                elif pred == -1 and req_rate > 40:
+                # -------- ML fallback --------
+                elif pred == -1:
                     attack_type = "Network Anomaly"
                 print(f"[ALERT] {attack_type} detected from {ip}")
 
