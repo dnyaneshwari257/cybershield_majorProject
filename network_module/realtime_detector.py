@@ -154,7 +154,7 @@ def monitor():
                 attack_type = None
 
                 # BRUTE FORCE
-                if top_ep == "/login" and req_rate > 8 and err_rate > 0.5:
+                if top_ep == "/login" and uniq_ep == 1 and req_rate > 8:
                     attack_type = "Brute Force"
 
                 # PORT SCAN
