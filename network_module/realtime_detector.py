@@ -148,29 +148,27 @@ def monitor():
                 top_ep = features.loc[ip]['top_endpoint']
 
                 print(f"IP:{ip}  Rate:{req_rate}  Unique:{uniq_ep}  Top:{top_ep}  Error:{err_rate}")
-
-                # ================= DETECTION LOGIC =================
-
+                
                 attack_type = None
 
-                # BRUTE FORCE
+                # -------- BRUTE FORCE --------
                 if top_ep == "/login" and uniq_ep == 1 and req_rate > 8:
                     attack_type = "Brute Force"
 
-                # PORT SCAN
-                elif uniq_ep >= 10 and err_rate > 0.6:
+                # -------- PORT SCAN --------
+                elif uniq_ep >= 12 and req_rate < 60 and err_rate > 0.6:
                     attack_type = "Port Scan"
 
-                # RECON
-                elif 5 <= uniq_ep < 10 and err_rate > 0.5 and req_rate < 40:
+                # -------- RECON --------
+                elif 5 <= uniq_ep < 12 and req_rate < 20:
                     attack_type = "Reconnaissance"
 
-                # ENDPOINT FLOOD
-                elif uniq_ep > 5 and req_rate > 40:
+                # -------- ENDPOINT FLOOD --------
+                elif uniq_ep >= 5 and req_rate >= 60 and req_rate < 120:
                     attack_type = "Endpoint Flood"
 
-                # DOS
-                elif req_rate > 120:
+                # -------- DOS --------
+                elif req_rate >= 120:
                     attack_type = "DoS Attack"
                 print(f"[ALERT] {attack_type} detected from {ip}")
                 
