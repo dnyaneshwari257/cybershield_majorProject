@@ -76,8 +76,9 @@ function validatePhone(phone) {
 }
 
 function validateMoodleId(moodleId) {
-    const re = /^(EDU\d{5}|ADMIN\d{3})$/;
-    return re.test(moodleId.toUpperCase());
+    if(username.length < 1){
+    alert("Username required");
+}
 }
 
 // Registration form handler

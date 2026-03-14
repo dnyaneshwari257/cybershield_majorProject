@@ -375,7 +375,7 @@ def login():
     data = request.get_json() or request.form
     username = data.get("moodle_id")
     password = data.get("password")
-        # =========================
+    # =========================
     # SQL INJECTION DETECTION
     # =========================
 
