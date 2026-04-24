@@ -1238,7 +1238,7 @@ def api_network():
 
         if os.path.exists(LOG_FILE):
 
-            with open(LOG_FILE, "r") as f:
+            with open("server_traffic.log", "a") as f:
 
                 lines = f.readlines()[-5000:]
 
@@ -1504,4 +1504,4 @@ def reset_password():
 # ---------- Run ----------
 if __name__ == '__main__':
     # host='0.0.0.0' opens the server to your local Wi-Fi
-    app.run()
+    app.run(host="0.0.0.0", port=5000)

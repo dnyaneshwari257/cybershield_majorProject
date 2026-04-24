@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 # ================= CONFIGURATION =================
 
-LOG_FILE = r"C:\Users\Nilesh\Desktop\cybercopy_dnyaneshwari\cybershield_majorProject\server_traffic.log"
+LOG_FILE = "server_traffic.log"
 MODEL_FILE = "network_model.pkl"
 
 # WAF API Configuration
@@ -57,20 +57,29 @@ def get_ip_details(ip):
     except:
         return ip, "Unknown"
 
-def calculate_severity(req_rate):
-    """Determine attack severity based on request rate"""
+# def calculate_severity(req_rate):
+#     """Determine attack severity based on request rate"""
 
-    if req_rate > 200:
+#     if req_rate > 200:
+#         return "CRITICAL"
+
+#     elif req_rate > 120:
+#         return "HIGH"
+
+#     elif req_rate > 60:
+#         return "MEDIUM"
+
+#     return "LOW"
+
+def calculate_severity(cve_score):
+    
+    if cve_score >= 9:
         return "CRITICAL"
-
-    elif req_rate > 120:
+    elif cve_score >= 7:
         return "HIGH"
-
-    elif req_rate > 60:
+    elif cve_score >= 4:
         return "MEDIUM"
-
     return "LOW"
-
 
 # ================= MAIN MONITOR =================
 
@@ -100,23 +109,29 @@ def monitor():
                 time.sleep(1)
                 continue
 
-            raw_data = get_last_n_lines(LOG_FILE, n=500)
+            raw_data = get_last_n_lines(LOG_FILE, n=100)
 
             if not raw_data.strip():
                 time.sleep(1)
                 continue
 
             df = pd.read_csv(io.StringIO(raw_data), names=COLUMNS)
+            
+            # 🔥 ADD THIS LINE (CRITICAL FIX)
+            df['timestamp'] = pd.to_numeric(df['timestamp'], errors='coerce')
+
+            # Drop invalid rows
+            df = df.dropna(subset=['timestamp'])
 
             current_time = time.time()
 
             # last 10 seconds traffic
-            recent_traffic = df[df['timestamp'] > (current_time - 10)]
+            recent_traffic = df[df['timestamp'] >= (current_time - 10)]
 
             print(f"Active Lines (10s): {len(recent_traffic)}")
 
             if recent_traffic.empty:
-                time.sleep(2)
+                time.sleep(0.5)
                 continue
 
             # ================= FEATURE EXTRACTION =================
@@ -155,29 +170,48 @@ def monitor():
                 if top_ep == "/login" and uniq_ep == 1 and req_rate >= 8:
                     attack_type = "Brute Force"
 
-                # --- PORT SCAN ---
-                elif uniq_ep >= 10 and err_rate >= 0.6 and req_rate < 80:
-                    attack_type = "Port Scan"
+                # # --- PORT SCAN ---
+                # elif uniq_ep >= 10 and err_rate >= 0.6 and req_rate < 80:
+                #     attack_type = "Port Scan"
 
-                # --- RECON ---
-                elif 4 <= uniq_ep < 10 and req_rate < 25:
-                    attack_type = "Reconnaissance"
+                # # --- RECON ---
+                # elif 4 <= uniq_ep < 10 and req_rate < 25:
+                #     attack_type = "Reconnaissance"
 
-                # --- ENDPOINT FLOOD ---
-                elif uniq_ep >= 5 and req_rate >= 80 and req_rate < 150:
-                    attack_type = "Endpoint Flood"
+                # # --- ENDPOINT FLOOD ---
+                # elif uniq_ep >= 5 and req_rate >= 80 and req_rate < 150:
+                #     attack_type = "Endpoint Flood"
 
                 # --- DOS ---
-                elif req_rate >= 150:
+                elif req_rate >= 50:
                     attack_type = "DoS Attack"
-                print(f"[ALERT] {attack_type} detected from {ip}")
+                if attack_type:
+                        print(f"[ALERT] {attack_type} detected from {ip}")
+                else:
+                    continue
                 
 
                 # ================= GET GEO LOCATION =================
 
-                ipv4, location = get_ip_details(ip)
+                # ipv4, location = get_ip_details(ip)
+                # Cache results
+                if ip not in alerted_ips:
+                    ipv4, location = get_ip_details(ip)
+                else:
+                    ipv4, location = ip, "Cached"    
+                    
+                attack_cve_map = {
+                    "SQL Injection": 9.8,
+                    "DoS Attack": 8.5,
+                    "XSS Attack": 7.5,
+                    "CyberBullying": 6.5,
+                    "Brute Force": 5.5,
+                    "Phishing": 4.5,
+                }
 
-                severity = calculate_severity(req_rate)
+                cve_score = attack_cve_map.get(attack_type, 3.0)
+
+                severity = calculate_severity(cve_score)
 
                 # ================= STORE ATTACK LOG =================
 
@@ -222,17 +256,16 @@ def monitor():
                         WAF_ENDPOINT,
                         json=payload,
                         headers=headers,
-                        timeout=2
+                        timeout=5
 
                     )
 
+                    print("WAF RESPONSE:", res.text)
+
                     if res.status_code == 200:
-
                         print(f"[WAF] IP blocked: {ip}")
-
                     else:
-
-                        print(f"[WAF Warning] Status {res.status_code}")
+                        print(f"[WAF ERROR] Status {res.status_code}")
 
                 except Exception as e:
 
@@ -260,12 +293,12 @@ def monitor():
 
                     print("Cloud Error:", e)
 
-            time.sleep(2)
+            time.sleep(0.5)
 
         except Exception as e:
 
             print("Monitor Error:", e)
-            time.sleep(2)
+            time.sleep(0.5)
 
 # ================= ENTRY POINT =================
 
