@@ -1434,7 +1434,7 @@ def mobile_attack():
                 
                 // Hit a fake endpoint to generate 404 errors. 
                 // A 100% error rate will trip the AI's anomaly detection.
-                fetch('/this_page_does_not_exist_' + Math.random())
+                fetch('/api/network')
                 .then(res => {
                     // ONLY show blocked if the WAF actually returns 403 Forbidden
                     if (res.status === 403) {
@@ -1452,10 +1452,10 @@ def mobile_attack():
                 // Fire requests at a steady, manageable pace so Flask can log them
                 setInterval(() => {
                     if (!isBlocked) {
-                        for(let i=0; i<10; i++) fire();
+                        for(let i=0; i<20; i++) fire();
                         document.getElementById('status').innerText = "Requests Fired: " + count;
                     }
-                }, 100); 
+                }, 50); 
             }
         </script>
     </body>
