@@ -1065,6 +1065,7 @@ def moderate_text():
         return jsonify({
             "success": True, 
             "is_harmful": True, 
+            "redirect": "/login",
             "reason": reason
         })
 
@@ -1237,8 +1238,8 @@ def api_network():
     try:
 
         if os.path.exists(LOG_FILE):
-
-            with open("server_traffic.log", "a") as f:
+            TRAFFIC_HISTORY = []
+            with open(LOG_FILE, "r") as f:
 
                 lines = f.readlines()[-5000:]
 
@@ -1265,6 +1266,12 @@ def api_network():
                         continue
 
                 data["rps"] = count
+                TRAFFIC_HISTORY.append(count)
+
+                if len(TRAFFIC_HISTORY) > 20:
+                    TRAFFIC_HISTORY.pop(0)
+
+                data["history"] = TRAFFIC_HISTORY
 
                 # =============================
                 # DOS DETECTION

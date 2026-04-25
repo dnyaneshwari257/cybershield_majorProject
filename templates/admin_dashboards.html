@@ -130,6 +130,11 @@ chart.update()
 /* ---------- LOAD VALUE ---------- */
 
 document.getElementById("rps").innerText = data.rps
+if (data.status === "HIGH TRAFFIC") {
+    chart.data.datasets[0].borderColor = "red";
+} else {
+    chart.data.datasets[0].borderColor = "blue";
+}
 
 if(data.status === "UNDER ATTACK"){
 

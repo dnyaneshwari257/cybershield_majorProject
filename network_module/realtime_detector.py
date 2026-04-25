@@ -16,7 +16,7 @@ LOG_FILE = "server_traffic.log"
 MODEL_FILE = "network_model.pkl"
 
 # WAF API Configuration
-WAF_ENDPOINT = "https://cybershield-majorproject.onrender.com/api/internal/block_ip"
+WAF_ENDPOINT = "http://52.66.235.68:5000/api/internal/block_ip"
 INTERNAL_API_KEY = "CyberShield_WAF_Secret_998877"
 
 
@@ -183,7 +183,7 @@ def monitor():
                 #     attack_type = "Endpoint Flood"
 
                 # --- DOS ---
-                elif req_rate >= 50:
+                elif req_rate >= 30:
                     attack_type = "DoS Attack"
                 if attack_type:
                         print(f"[ALERT] {attack_type} detected from {ip}")
